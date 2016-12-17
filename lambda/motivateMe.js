@@ -1,10 +1,8 @@
-/**
- 
- Copyright 2016 Brian Donohue.
- 
-*/
+// Copyright 2016 Desmond Vehar.
 
 'use strict';
+
+var APP_NAME = 'Motivate Me';
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
@@ -60,11 +58,12 @@ function onSessionStarted(sessionStartedRequest, session) {
  * Called when the user invokes the skill without specifying what they want.
  */
 function onLaunch(launchRequest, session, callback) {
+    // TODO(desmondv): fetch a random quote
     console.log("onLaunch requestId=" + launchRequest.requestId
         + ", sessionId=" + session.sessionId);
 
-    var cardTitle = "Hello, World!"
-    var speechOutput = "You can tell Hello, World! to say Hello, World!"
+    var cardTitle = APP_NAME + "!";
+    var speechOutput = "You can tell " + APP_NAME + " to get you a random quote";
     callback(session.attributes,
         buildSpeechletResponse(cardTitle, speechOutput, "", true));
 }
@@ -81,6 +80,7 @@ function onIntent(intentRequest, session, callback) {
 
     // dispatch custom intents to handlers here
     if (intentName == 'TestIntent') {
+        // TODO(desmondv): remove
         handleTestRequest(intent, session, callback);
     } else if (intentName == 'GetRandomMotivationQuote') {
         handleTestRequest(intent, session, callback);
