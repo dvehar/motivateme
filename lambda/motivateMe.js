@@ -2,6 +2,9 @@
 
 'use strict';
 
+var request = require('request');
+var cheerio = require('cheerio');
+
 var APP_NAME = 'Motivate Me';
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
@@ -83,7 +86,7 @@ function onIntent(intentRequest, session, callback) {
         // TODO(desmondv): remove
         handleTestRequest(intent, session, callback);
     } else if (intentName == 'GetRandomMotivationQuote') {
-        handleTestRequest(intent, session, callback);
+        handleIntentGetRandomMotivationQuote(intent, session, callback);
     }
     else {
         throw "Invalid intent";
@@ -104,6 +107,29 @@ function onSessionEnded(sessionEndedRequest, session) {
 function handleTestRequest(intent, session, callback) {
     callback(session.attributes,
         buildSpeechletResponseWithoutCard("Hello, Desmond!", "", "true"));
+}
+
+function handleIntentGetRandomMotivationQuote(intent, session, callback) {
+    getRandomDesignQuote(function (quote) {
+        callback(session.attributes,
+            buildSpeechletResponseWithoutCard(quote, "", "true"));
+    });
+}
+
+// ------- Helper functions to fetch quotes -------
+
+function getRandomDesignQuote (callback) {
+    request('http://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var body = JSON.parse(body)[0];
+            var rawQuote = body.content; // '<p>.....</p>\n'
+            var cleanQuoteHtml = rawQuote.substring(0, rawQuote.length-1); // remove the newline
+            var $ = cheerio.load(cleanQuoteHtml);
+            callback($('p').text().trim());
+          } else {
+            throw('getRandomDesignQuote call failed: ' + error);
+          }
+    });
 }
 
 // ------- Helper functions to build responses -------
