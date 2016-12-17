@@ -6,6 +6,7 @@ var request = require('request');
 var cheerio = require('cheerio');
 
 var APP_NAME = 'Motivate Me';
+var APP_ID_WHITELIST = ['amzn1.ask.skill.bd846ccf-84a7-4340-9249-5da185dfc1f7'];
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
@@ -13,14 +14,10 @@ exports.handler = function (event, context) {
     try {
         console.log("event.session.application.applicationId=" + event.session.application.applicationId);
 
-        /**
-         * Uncomment this if statement and populate with your skill's application ID to
-         * prevent someone else from configuring a skill that sends requests to this function.
-         */
-		 
-//     if (event.session.application.applicationId !== "amzn1.echo-sdk-ams.app.05aecccb3-1461-48fb-a008-822ddrt6b516") {
-//         context.fail("Invalid Application ID");
-//      }
+        // Prevent someone else from configuring a skill that sends request to this lambda
+        if (APP_ID_WHITELIST.indexOf(event.session.application.applicationId) == -1) {
+            context.fail("Invalid Application ID");
+        }
 
         if (event.session.new) {
             onSessionStarted({requestId: event.request.requestId}, event.session);
@@ -61,14 +58,13 @@ function onSessionStarted(sessionStartedRequest, session) {
  * Called when the user invokes the skill without specifying what they want.
  */
 function onLaunch(launchRequest, session, callback) {
-    // TODO(desmondv): fetch a random quote
     console.log("onLaunch requestId=" + launchRequest.requestId
         + ", sessionId=" + session.sessionId);
 
     var cardTitle = APP_NAME + "!";
-    var speechOutput = "You can tell " + APP_NAME + " to get you a random quote";
-    callback(session.attributes,
-        buildSpeechletResponse(cardTitle, speechOutput, "", true));
+    getRandomDesignQuote(function (quote) {
+        callback(session.attributes, buildSpeechletResponse(cardTitle, quote, "", true));
+    });
 }
 
 /**
