@@ -83,8 +83,9 @@ function onIntent(intentRequest, session, callback) {
         handleTestRequest(intent, session, callback);
     } else if (intentName == 'GetRandomMotivationQuote') {
         handleIntentGetRandomMotivationQuote(intent, session, callback);
-    }
-    else {
+    } else if (intentName == 'GetRandomDesignQuote') {
+        handleIntentGetRandomDesignQuote(intent, session, callback);
+    } else {
         throw "Invalid intent";
     }
 }
@@ -106,6 +107,13 @@ function handleTestRequest(intent, session, callback) {
 }
 
 function handleIntentGetRandomMotivationQuote(intent, session, callback) {
+    getRandomDesignQuote(function (quote) {
+        callback(session.attributes,
+            buildSpeechletResponseWithoutCard("motivate, " + quote, "", "true"));
+    });
+}
+
+function handleIntentGetRandomDesignQuote(intent, session, callback) {
     getRandomDesignQuote(function (quote) {
         callback(session.attributes,
             buildSpeechletResponseWithoutCard(quote, "", "true"));
