@@ -170,10 +170,10 @@ function getRandomMotivationalQuoteSoure2 (callback) {
             var rawQuote = quotes[randomIdx];
             callback(rawQuote.children[0].data);
         } else {
-            throw('getRandomMotivationalQuoteSoure1 call failed: no quotes');
+            throw('getRandomMotivationalQuoteSoure2 call failed: no quotes');
         }
       } else {
-        throw('getRandomMotivationalQuoteSoure1 call failed: ' + error);
+        throw('getRandomMotivationalQuoteSoure2 call failed: ' + error);
       }
     });
 }
@@ -189,10 +189,10 @@ function getRandomMotivationalQuoteSoure3 (callback) {
                 var rawQuote = quotes[randomIdx];
                 callback(rawQuote.children[0].data.trim());
             } else {
-                throw('getRandomMotivationalQuote call failed: no quotes');
+                throw('getRandomMotivationalQuote3 call failed: no quotes');
             }
         } else {
-            throw('getRandomMotivationalQuote call failed: ' + error);
+            throw('getRandomMotivationalQuote3 call failed: ' + error);
         }
     });
 }
