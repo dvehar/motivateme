@@ -62,7 +62,7 @@ function onLaunch(launchRequest, session, callback) {
         + ", sessionId=" + session.sessionId);
 
     var cardTitle = APP_NAME + "!";
-    getRandomDesignQuote(function (quote) {
+    getRandomMotivationalQuote(function (quote) {
         callback(session.attributes, buildSpeechletResponse(cardTitle, quote, "", true));
     });
 }
@@ -107,9 +107,9 @@ function handleTestRequest(intent, session, callback) {
 }
 
 function handleIntentGetRandomMotivationQuote(intent, session, callback) {
-    getRandomDesignQuote(function (quote) {
+    getRandomMotivationalQuote(function (quote) {
         callback(session.attributes,
-            buildSpeechletResponseWithoutCard("motivate, " + quote, "", "true"));
+            buildSpeechletResponseWithoutCard(quote, "", "true"));
     });
 }
 
@@ -122,11 +122,29 @@ function handleIntentGetRandomDesignQuote(intent, session, callback) {
 
 // ------- Helper functions to fetch quotes -------
 
+function getRandomMotivationalQuote (callback) {
+    request('http://www.quotationspage.com/random.php3', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var $ = cheerio.load(body);
+            var quotes = $('dt.quote a[href *= "/quote/"]');
+            if (quotes.length > 0) {
+                var randomIdx = Math.floor(Math.random() * quotes.length);
+                var rawQuote = quotes[randomIdx];
+                callback(rawQuote.children[0].data.trim());
+            } else {
+                throw('getRandomDesignQuote call failed: ' + error);
+            }
+        } else {
+            throw('getRandomDesignQuote call failed: ' + error);
+        }
+    });
+}
+
 function getRandomDesignQuote (callback) {
     request('http://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1', function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            var body = JSON.parse(body)[0];
-            var rawQuote = body.content; // '<p>.....</p>\n'
+            var cleanBody = JSON.parse(body)[0];
+            var rawQuote = cleanBody.content; // '<p>.....</p>\n'
             var cleanQuoteHtml = rawQuote.substring(0, rawQuote.length-1); // remove the newline
             var $ = cheerio.load(cleanQuoteHtml);
             callback($('p').text().trim());
