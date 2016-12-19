@@ -123,6 +123,63 @@ function handleIntentGetRandomDesignQuote(intent, session, callback) {
 // ------- Helper functions to fetch quotes -------
 
 function getRandomMotivationalQuote (callback) {
+    var sources = [
+        getRandomMotivationalQuoteSoure1,
+        getRandomMotivationalQuoteSoure2/*,
+        getRandomMotivationalQuoteSoure3*/
+    ];
+    var sourceToUse = sources[Math.floor(Math.random() * sources.length)];
+    sourceToUse(callback);
+}
+
+// Go to a random page (0-9 inclusive) and pick a random quote
+function getRandomMotivationalQuoteSoure1 (callback) {
+    var min = 0;
+    var max = 9;
+    var pageNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    var page = (pageNum == min ? '': pageNum);
+    request('https://www.brainyquote.com/quotes/topics/topic_motivational' + page + '.html', function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        var $ = cheerio.load(body);
+        var quotes = $('a[title="view quote"]');
+        if (quotes.length > 0) {
+            var randomIdx = Math.floor(Math.random() * quotes.length);
+            var rawQuote = quotes[randomIdx];
+            callback(rawQuote.children[0].data);
+        } else {
+            throw('getRandomMotivationalQuoteSoure1 call failed: no quotes');
+        }
+      } else {
+        throw('getRandomMotivationalQuoteSoure1 call failed: ' + error);
+      }
+    });
+}
+
+// Go to a random page (1-9 inclusive) and pick a random quote
+function getRandomMotivationalQuoteSoure2 (callback) {
+    var min = 1;
+    var max = 9;
+    var pageNum = Math.floor(Math.random() * (max - min + 1)) + min;
+    var page = (pageNum == min ? '': '/page/' + pageNum);
+    request('http://quotelicious.com/quotes/motivational-quotes' + page, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        var $ = cheerio.load(body);
+        var quotes = $('div#content-quotespage div.post a');
+        if (quotes.length > 0) {
+            var randomIdx = Math.floor(Math.random() * quotes.length);
+            var rawQuote = quotes[randomIdx];
+            callback(rawQuote.children[0].data);
+        } else {
+            throw('getRandomMotivationalQuoteSoure1 call failed: no quotes');
+        }
+      } else {
+        throw('getRandomMotivationalQuoteSoure1 call failed: ' + error);
+      }
+    });
+}
+
+// Hit an API for a random quote
+function getRandomMotivationalQuoteSoure3 (callback) {
     request.post('http://www.quotationspage.com/random.php3', {"form": {"number":4, "collection[]": "motivate"}}, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var $ = cheerio.load(body);
@@ -132,10 +189,10 @@ function getRandomMotivationalQuote (callback) {
                 var rawQuote = quotes[randomIdx];
                 callback(rawQuote.children[0].data.trim());
             } else {
-                throw('getRandomDesignQuote call failed: ' + error);
+                throw('getRandomMotivationalQuote call failed: no quotes');
             }
         } else {
-            throw('getRandomDesignQuote call failed: ' + error);
+            throw('getRandomMotivationalQuote call failed: ' + error);
         }
     });
 }
