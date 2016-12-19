@@ -123,7 +123,7 @@ function handleIntentGetRandomDesignQuote(intent, session, callback) {
 // ------- Helper functions to fetch quotes -------
 
 function getRandomMotivationalQuote (callback) {
-    request('http://www.quotationspage.com/random.php3', function (error, response, body) {
+    request.post('http://www.quotationspage.com/random.php3', {"form": {"number":4, "collection[]": "motivate"}}, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var $ = cheerio.load(body);
             var quotes = $('dt.quote a[href *= "/quote/"]');
