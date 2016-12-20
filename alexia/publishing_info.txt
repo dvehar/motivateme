@@ -13,9 +13,9 @@ Invoke Motivate Me with...
 - "Alexia, ask Motivate Me for a quote about design"
 
 Example Phrases:
-Alexa, Motivate Me
-Alexa, ask Motivate Me for a quote
-Alexa, ask Motivate Me for a quote about design
+Alexa, Motivate Me.
+Alexa, ask Motivate Me for a motivational quote.
+Alexa, ask Motivate Me for a random quote.
 
 Keywords:
 motivational, motivation, quote, inspiration, quotes, get, motivated
