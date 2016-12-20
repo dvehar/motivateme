@@ -62,8 +62,17 @@ function onLaunch(launchRequest, session, callback) {
         + ", sessionId=" + session.sessionId);
 
     var cardTitle = APP_NAME + "!";
-    getRandomMotivationalQuote(function (quote) {
-        callback(session.attributes, buildSpeechletResponse(cardTitle, quote, "", true));
+    getRandomMotivationalQuote(function (result) {
+        var response = new SSML();
+        response
+            .openSpeakTag()
+            .openParagraphTag()
+            .addPlainText(result.quote)
+            .closeParagraphTag()
+            .addPlainText(result.author)
+            .closeSpeakTag();
+        callback(session.attributes,
+            buildSpeechletResponse(cardTitle, response.toString(), "", "true"));
     });
 }
 
@@ -72,7 +81,8 @@ function onLaunch(launchRequest, session, callback) {
  */
 function onIntent(intentRequest, session, callback) {
     console.log("onIntent requestId=" + intentRequest.requestId
-        + ", sessionId=" + session.sessionId);
+        + ", sessionId=" + session.sessionId
+        + ", intentName=" + intentRequest.intent.name);
 
     var intent = intentRequest.intent,
         intentName = intentRequest.intent.name;
@@ -107,16 +117,32 @@ function handleTestRequest(intent, session, callback) {
 }
 
 function handleIntentGetRandomMotivationQuote(intent, session, callback) {
-    getRandomMotivationalQuote(function (quote) {
+    getRandomMotivationalQuote(function (result) {
+        var response = new SSML();
+        response
+            .openSpeakTag()
+            .openParagraphTag()
+            .addPlainText(result.quote)
+            .closeParagraphTag()
+            .addPlainText(result.author)
+            .closeSpeakTag();
         callback(session.attributes,
-            buildSpeechletResponseWithoutCard(quote, "", "true"));
+            buildSpeechletResponseWithoutCard(response.toString(), "", "true"));
     });
 }
 
 function handleIntentGetRandomDesignQuote(intent, session, callback) {
-    getRandomDesignQuote(function (quote) {
+    getRandomDesignQuote(function (result) {
+        var response = new SSML();
+        response
+            .openSpeakTag()
+            .openParagraphTag()
+            .addPlainText(result.quote)
+            .closeParagraphTag()
+            .addPlainText(result.author)
+            .closeSpeakTag();
         callback(session.attributes,
-            buildSpeechletResponseWithoutCard(quote, "", "true"));
+            buildSpeechletResponseWithoutCard(response.toString(), "", "true"));
     });
 }
 
@@ -134,6 +160,7 @@ function getRandomMotivationalQuote (callback) {
 
 // Go to a random page (0-9 inclusive) and pick a random quote
 function getRandomMotivationalQuoteSoure1 (callback) {
+    console.log('getRandomMotivationalQuoteSoure1');
     var min = 0;
     var max = 9;
     var pageNum = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -141,11 +168,16 @@ function getRandomMotivationalQuoteSoure1 (callback) {
     request('https://www.brainyquote.com/quotes/topics/topic_motivational' + page + '.html', function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var $ = cheerio.load(body);
-        var quotes = $('a[title="view quote"]');
+        var quotes = $('div#quotesList div.bqQt');
         if (quotes.length > 0) {
             var randomIdx = Math.floor(Math.random() * quotes.length);
             var rawQuote = quotes[randomIdx];
-            callback(rawQuote.children[0].data);
+            var quote = $('a[title="view quote"]', rawQuote).text();
+            var author = $('a[title="view author"]', rawQuote).text();
+            callback({
+                quote: quote,
+                author: author
+            });
         } else {
             throw('getRandomMotivationalQuoteSoure1 call failed: no quotes');
         }
@@ -157,6 +189,7 @@ function getRandomMotivationalQuoteSoure1 (callback) {
 
 // Go to a random page (1-9 inclusive) and pick a random quote
 function getRandomMotivationalQuoteSoure2 (callback) {
+    console.log('getRandomMotivationalQuoteSoure2');
     var min = 1;
     var max = 9;
     var pageNum = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -164,11 +197,16 @@ function getRandomMotivationalQuoteSoure2 (callback) {
     request('http://quotelicious.com/quotes/motivational-quotes' + page, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var $ = cheerio.load(body);
-        var quotes = $('div#content-quotespage div.post a');
+        var quotes = $('div#content-quotespage div.post');
         if (quotes.length > 0) {
             var randomIdx = Math.floor(Math.random() * quotes.length);
             var rawQuote = quotes[randomIdx];
-            callback(rawQuote.children[0].data);
+            var quote = $('a', rawQuote).text();
+            var author = $('em', rawQuote).text().substring(2).trim();
+            callback({
+                quote: quote,
+                author: author
+            });
         } else {
             throw('getRandomMotivationalQuoteSoure2 call failed: no quotes');
         }
@@ -180,14 +218,20 @@ function getRandomMotivationalQuoteSoure2 (callback) {
 
 // Hit an API for a random quote
 function getRandomMotivationalQuoteSoure3 (callback) {
+    console.log('getRandomMotivationalQuoteSoure3');
     request.post('http://www.quotationspage.com/random.php3', {"form": {"number":4, "collection[]": "motivate"}}, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var $ = cheerio.load(body);
             var quotes = $('dt.quote a[href *= "/quote/"]');
+            var authors = $('dd.author a[href *= "/quotes/"]');
             if (quotes.length > 0) {
                 var randomIdx = Math.floor(Math.random() * quotes.length);
-                var rawQuote = quotes[randomIdx];
-                callback(rawQuote.children[0].data.trim());
+                var quote = quotes[randomIdx].children[0].data.trim();
+                var author = authors[randomIdx].children[0].data.trim();
+                callback({
+                    quote: quote,
+                    author: author
+                });
             } else {
                 throw('getRandomMotivationalQuote3 call failed: no quotes');
             }
@@ -198,26 +242,45 @@ function getRandomMotivationalQuoteSoure3 (callback) {
 }
 
 function getRandomDesignQuote (callback) {
+    console.log('getRandomDesignQuote');
     request('http://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1', function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var cleanBody = JSON.parse(body)[0];
+            var author = cleanBody.title;
             var rawQuote = cleanBody.content; // '<p>.....</p>\n'
             var cleanQuoteHtml = rawQuote.substring(0, rawQuote.length-1); // remove the newline
             var $ = cheerio.load(cleanQuoteHtml);
-            callback($('p').text().trim());
+            var quote = $('p').text().trim();
+            callback({
+                quote: quote,
+                author: author
+            });
           } else {
             throw('getRandomDesignQuote call failed: ' + error);
           }
     });
 }
 
+// ------- SSML Helper -------
+
+function SSML() {
+    this.text = '';
+}
+SSML.prototype.openSpeakTag = function () { this.text += '<speak>'; return this; };
+SSML.prototype.closeSpeakTag = function () { this.text += '</speak>'; return this; };
+SSML.prototype.openParagraphTag = function () { this.text += '<p>'; return this; };
+SSML.prototype.closeParagraphTag = function () { this.text += '</p>'; return this; };
+SSML.prototype.addPlainText = function (text) { this.text += text; return this; };
+SSML.prototype.addStrongBreak = function () { this.text += '<break strength="strong"/>'; return this; };
+SSML.prototype.toString = function () { return this.text; };
+
 // ------- Helper functions to build responses -------
 
 function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
     return {
         outputSpeech: {
-            type: "PlainText",
-            text: output
+            type: "SSML",
+            ssml: output
         },
         card: {
             type: "Simple",
@@ -237,8 +300,8 @@ function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
 function buildSpeechletResponseWithoutCard(output, repromptText, shouldEndSession) {
     return {
         outputSpeech: {
-            type: "PlainText",
-            text: output
+            type: "SSML",
+            ssml: output
         },
         reprompt: {
             outputSpeech: {
