@@ -1,0 +1,21 @@
+Category:
+Lifestyle
+
+Sub Category:
+Self Improvement
+
+Testing Instructions:
+Nothing special:
+Invoke Motivate Me with...
+- "Alexia, Motivate Me"
+- "Alexia, ask Motivate Me for a quote"
+- "Alexia, ask Motivate Me for a motivational quote"
+- "Alexia, ask Motivate Me for a quote about design"
+
+Example Phrases:
+Alexa, Motivate Me
+Alexa, ask Motivate Me for a quote
+Alexa, ask Motivate Me for a quote about design
+
+Keywords:
+motivational, motivation, quote, inspiration, quotes, get, motivated
