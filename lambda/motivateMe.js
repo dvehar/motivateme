@@ -72,7 +72,7 @@ function onLaunch(launchRequest, session, callback) {
             .addPlainText(result.author)
             .closeSpeakTag();
         callback(session.attributes,
-            buildSpeechletResponse(cardTitle, response.toString(), "", "true"));
+            buildSpeechletResponse(cardTitle, response.toString(), getCardText(result), "", "true"));
     });
 }
 
@@ -274,9 +274,15 @@ SSML.prototype.addPlainText = function (text) { this.text += text; return this; 
 SSML.prototype.addStrongBreak = function () { this.text += '<break strength="strong"/>'; return this; };
 SSML.prototype.toString = function () { return this.text; };
 
+// ------- Card Text Helper -------
+
+function getCardText(quote) {
+    return '"' + quote.quote + "'\n - " + quote.author;
+}
+
 // ------- Helper functions to build responses -------
 
-function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
+function buildSpeechletResponse(title, output, cardText, repromptText, shouldEndSession) {
     return {
         outputSpeech: {
             type: "SSML",
@@ -285,7 +291,7 @@ function buildSpeechletResponse(title, output, repromptText, shouldEndSession) {
         card: {
             type: "Simple",
             title: title,
-            content: output
+            content: cardText
         },
         reprompt: {
             outputSpeech: {
