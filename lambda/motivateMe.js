@@ -5,8 +5,13 @@
 var request = require('request');
 var cheerio = require('cheerio');
 
-var APP_NAME = 'Motivate Me';
-var APP_ID_WHITELIST = ['amzn1.ask.skill.bd846ccf-84a7-4340-9249-5da185dfc1f7'];
+var APP_NAME = 'Motivate Me Test';
+var PROD_APP_ID = 'amzn1.ask.skill.bd846ccf-84a7-4340-9249-5da185dfc1f7';
+var TEST_APP_ID = 'amzn1.ask.skill.2bad9158-37e8-4b41-b534-2af458246d16';
+var APP_ID_WHITELIST = [PROD_APP_ID, TEST_APP_ID];
+
+// Env Variables:
+// FLICKR_KEY - the public key for the flickr api
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
@@ -71,8 +76,10 @@ function onLaunch(launchRequest, session, callback) {
             .closeParagraphTag()
             .addPlainText(result.author)
             .closeSpeakTag();
-        callback(session.attributes,
-            buildSpeechletResponse(cardTitle, response.toString(), getCardText(result), "", "true"));
+
+        getRandomLandscapePhotoUrl(function (photoUrl) {
+            callback(session.attributes, buildSpeechletResponseWithImage(cardTitle, response.toString(), getCardText(result), photoUrl, "", "true"));
+        });
     });
 }
 
@@ -88,13 +95,8 @@ function onIntent(intentRequest, session, callback) {
         intentName = intentRequest.intent.name;
 
     // dispatch custom intents to handlers here
-    if (intentName == 'TestIntent') {
-        // TODO(desmondv): remove
-        handleTestRequest(intent, session, callback);
-    } else if (intentName == 'GetRandomMotivationQuote') {
+    if (intentName == 'GetRandomMotivationQuote') {
         handleIntentGetRandomMotivationQuote(intent, session, callback);
-    } else if (intentName == 'GetRandomDesignQuote') {
-        handleIntentGetRandomDesignQuote(intent, session, callback);
     } else {
         throw "Invalid intent";
     }
@@ -111,11 +113,6 @@ function onSessionEnded(sessionEndedRequest, session) {
     // Add any cleanup logic here
 }
 
-function handleTestRequest(intent, session, callback) {
-    callback(session.attributes,
-        buildSpeechletResponseWithoutCard("Hello, Desmond!", "", "true"));
-}
-
 function handleIntentGetRandomMotivationQuote(intent, session, callback) {
     getRandomMotivationalQuote(function (result) {
         var response = new SSML();
@@ -126,23 +123,10 @@ function handleIntentGetRandomMotivationQuote(intent, session, callback) {
             .closeParagraphTag()
             .addPlainText(result.author)
             .closeSpeakTag();
-        callback(session.attributes,
-            buildSpeechletResponseWithoutCard(response.toString(), "", "true"));
-    });
-}
-
-function handleIntentGetRandomDesignQuote(intent, session, callback) {
-    getRandomDesignQuote(function (result) {
-        var response = new SSML();
-        response
-            .openSpeakTag()
-            .openParagraphTag()
-            .addPlainText(result.quote)
-            .closeParagraphTag()
-            .addPlainText(result.author)
-            .closeSpeakTag();
-        callback(session.attributes,
-            buildSpeechletResponseWithoutCard(response.toString(), "", "true"));
+        var cardTitle = APP_NAME + "!";
+        getRandomLandscapePhotoUrl(function (photoUrl) {
+            callback(session.attributes, buildSpeechletResponseWithImage(cardTitle, response.toString(), getCardText(result), photoUrl, "", "true"));
+        });
     });
 }
 
@@ -261,6 +245,49 @@ function getRandomDesignQuote (callback) {
     });
 }
 
+// ------- FLICKR Helper -------
+
+function getFlickrUrl (farmId, serverId, photoId, photoSecret) {
+    return 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + photoId + '_' + photoSecret + '.jpg';
+}
+
+function _getRandomLandscapePhotoUrlCount (callback) {
+    request('https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=' + process.env.FLICKR_KEY + '&text=landscape&license=7&sort=relevance&per_page=1', function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var $ = cheerio.load(body);
+            callback($('photos').attr('total'));
+        } else {
+            throw('getRandomLandscapePhotoUrl call failed: ' + error);
+        }
+    });
+}
+
+function _getPageAndPhoto (photosPerPage, photoNumber) {
+    return {
+        page: Math.floor(photoNumber / photosPerPage),
+        photoIdx: (photoNumber % photosPerPage || photosPerPage) - 1
+    };
+}
+
+function getRandomLandscapePhotoUrl (callback) {
+    var photosPerPage = 100;
+    var randomPhoto = Math.floor(Math.random() * 300); // There are 500 results per page. Since we sort by relevence let's pick the top 300 to consider.
+    var randomPageAndPhoto = _getPageAndPhoto(photosPerPage, randomPhoto);
+    request('https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=' + process.env.FLICKR_KEY + '&text=landscape&license=7&sort=relevance&per_page=' + photosPerPage + '&page=' + randomPageAndPhoto.page, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            var $ = cheerio.load(body);
+            var photo = $('photo')[randomPageAndPhoto.photoIdx];
+            var farmId = photo.attribs.farm;
+            var serverId = photo.attribs.server;
+            var photoId = photo.attribs.id;
+            var photoSecret = photo.attribs.secret;
+            callback(getFlickrUrl(farmId, serverId, photoId, photoSecret));
+        } else {
+            throw('getRandomLandscapePhotoUrl call failed: ' + error);
+        }
+    });
+}
+
 // ------- SSML Helper -------
 
 function SSML() {
@@ -292,6 +319,31 @@ function buildSpeechletResponse(title, output, cardText, repromptText, shouldEnd
             type: "Simple",
             title: title,
             content: cardText
+        },
+        reprompt: {
+            outputSpeech: {
+                type: "PlainText",
+                text: repromptText
+            }
+        },
+        shouldEndSession: shouldEndSession
+    };
+}
+
+function buildSpeechletResponseWithImage(title, output, cardText, cardImageUrl, repromptText, shouldEndSession) {
+    return {
+        outputSpeech: {
+            type: "SSML",
+            ssml: output
+        },
+        card: {
+            type: "Standard",
+            title: title,
+            text: cardText,
+            image: {
+                smallImageUrl: cardImageUrl,
+                largeImageUrl: cardImageUrl
+            }
         },
         reprompt: {
             outputSpeech: {
