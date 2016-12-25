@@ -2,9 +2,6 @@
   "intents": [
     {
       "intent": "GetRandomMotivationQuote"
-    },
-    {
-      "intent": "GetRandomDesignQuote"	 
     }
   ]
 }

@@ -1,9 +1,2 @@
 GetRandomMotivationQuote for a quote
-GetRandomMotivationQuote for a random quote
-GetRandomMotivationQuote for a motivation quote
-GetRandomMotivationQuote for a random motivation quote
-GetRandomDesignQuote for a design quote
-GetRandomDesignQuote for a random design quote
-GetRandomDesignQuote for a quote about design
-GetRandomDesignQuote for a random quote about design
-
+GetRandomMotivationQuote for a motivational quote
