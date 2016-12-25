@@ -2,6 +2,9 @@
 
 'use strict';
 
+// Env Variables:
+// FLICKR_KEY - the public key for the flickr api
+
 var request = require('request');
 var cheerio = require('cheerio');
 var RSVP = require('rsvp');
@@ -10,9 +13,6 @@ var APP_NAME = 'Motivate Me Test';
 var PROD_APP_ID = 'amzn1.ask.skill.bd846ccf-84a7-4340-9249-5da185dfc1f7';
 var TEST_APP_ID = 'amzn1.ask.skill.2bad9158-37e8-4b41-b534-2af458246d16';
 var APP_ID_WHITELIST = [PROD_APP_ID, TEST_APP_ID];
-
-// Env Variables:
-// FLICKR_KEY - the public key for the flickr api
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
@@ -347,7 +347,7 @@ SSML.prototype.toString = function () { return this.text; };
 // ------- Card Text Helper -------
 
 function getCardText(quote) {
-    return '"' + quote.quote + "'\n - " + quote.author;
+    return '"' + quote.quote + '"\n - ' + quote.author;
 }
 
 // ------- Helper functions to build responses -------
