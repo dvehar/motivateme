@@ -13,6 +13,313 @@ var APP_NAME = 'Motivate Me Test';
 var PROD_APP_ID = 'amzn1.ask.skill.bd846ccf-84a7-4340-9249-5da185dfc1f7';
 var TEST_APP_ID = 'amzn1.ask.skill.2bad9158-37e8-4b41-b534-2af458246d16';
 var APP_ID_WHITELIST = [PROD_APP_ID, TEST_APP_ID];
+var UNKNOWN = 'Unknown';
+
+var QUOTES = [
+    // From https://www.brainyquote.com/quotes/topics/topic_motivational.html
+    'Life is 10% what happens to you and 90% how you react to it',
+    // From http://quotelicious.com/quotes/motivational-quotes
+    'If you can’t stop thinking about it, don’t stop working for it',
+    // From http://www.quotationspage.com/random.php3
+    'Never regret. If it\'s good, it\'s wonderful. If it\'s bad, it\'s experience',
+    'Life is 10% what happens to you and 90% how you react to it 4',
+    'Life is 10% what happens to you and 90% how you react to it 5',
+    'Life is 10% what happens to you and 90% how you react to it 6',
+    'Life is 10% what happens to you and 90% how you react to it 7',
+    'Life is 10% what happens to you and 90% how you react to it 8',
+    'Life is 10% what happens to you and 90% how you react to it 9',
+    'Life is 10% what happens to you and 90% how you react to it 10',
+    'Life is 10% what happens to you and 90% how you react to it 11',
+    'Life is 10% what happens to you and 90% how you react to it 12',
+    'Life is 10% what happens to you and 90% how you react to it 13',
+    'Life is 10% what happens to you and 90% how you react to it 14',
+    'Life is 10% what happens to you and 90% how you react to it 15',
+    'Life is 10% what happens to you and 90% how you react to it 16',
+    'Life is 10% what happens to you and 90% how you react to it 17',
+    'Life is 10% what happens to you and 90% how you react to it 18',
+    'Life is 10% what happens to you and 90% how you react to it 19',
+    'Life is 10% what happens to you and 90% how you react to it 20',
+    'Life is 10% what happens to you and 90% how you react to it 21',
+    'Life is 10% what happens to you and 90% how you react to it 22',
+    'Life is 10% what happens to you and 90% how you react to it 23',
+    'Life is 10% what happens to you and 90% how you react to it 24',
+    'Life is 10% what happens to you and 90% how you react to it 25',
+    'Life is 10% what happens to you and 90% how you react to it 26',
+    'Life is 10% what happens to you and 90% how you react to it 27',
+    'Life is 10% what happens to you and 90% how you react to it 28',
+    'Life is 10% what happens to you and 90% how you react to it 29',
+    'Life is 10% what happens to you and 90% how you react to it 30',
+    'Life is 10% what happens to you and 90% how you react to it 31',
+    'Life is 10% what happens to you and 90% how you react to it 32',
+    'Life is 10% what happens to you and 90% how you react to it 33',
+    'Life is 10% what happens to you and 90% how you react to it 34',
+    'Life is 10% what happens to you and 90% how you react to it 35',
+    'Life is 10% what happens to you and 90% how you react to it 36',
+    'Life is 10% what happens to you and 90% how you react to it 37',
+    'Life is 10% what happens to you and 90% how you react to it 38',
+    'Life is 10% what happens to you and 90% how you react to it 39',
+    'Life is 10% what happens to you and 90% how you react to it 40',
+    'Life is 10% what happens to you and 90% how you react to it 41',
+    'Life is 10% what happens to you and 90% how you react to it 42',
+    'Life is 10% what happens to you and 90% how you react to it 43',
+    'Life is 10% what happens to you and 90% how you react to it 44',
+    'Life is 10% what happens to you and 90% how you react to it 45',
+    'Life is 10% what happens to you and 90% how you react to it 46',
+    'Life is 10% what happens to you and 90% how you react to it 47',
+    'Life is 10% what happens to you and 90% how you react to it 48',
+    'Life is 10% what happens to you and 90% how you react to it 49',
+    'Life is 10% what happens to you and 90% how you react to it 50',
+    'Life is 10% what happens to you and 90% how you react to it 51',
+    'Life is 10% what happens to you and 90% how you react to it 52',
+    'Life is 10% what happens to you and 90% how you react to it 53',
+    'Life is 10% what happens to you and 90% how you react to it 54',
+    'Life is 10% what happens to you and 90% how you react to it 55',
+    'Life is 10% what happens to you and 90% how you react to it 56',
+    'Life is 10% what happens to you and 90% how you react to it 57',
+    'Life is 10% what happens to you and 90% how you react to it 58',
+    'Life is 10% what happens to you and 90% how you react to it 59',
+    'Life is 10% what happens to you and 90% how you react to it 60',
+    'Life is 10% what happens to you and 90% how you react to it 61',
+    'Life is 10% what happens to you and 90% how you react to it 62',
+    'Life is 10% what happens to you and 90% how you react to it 63',
+    'Life is 10% what happens to you and 90% how you react to it 64',
+    'Life is 10% what happens to you and 90% how you react to it 65',
+    'Life is 10% what happens to you and 90% how you react to it 66',
+    'Life is 10% what happens to you and 90% how you react to it 67',
+    'Life is 10% what happens to you and 90% how you react to it 68',
+    'Life is 10% what happens to you and 90% how you react to it 69',
+    'Life is 10% what happens to you and 90% how you react to it 70',
+    'Life is 10% what happens to you and 90% how you react to it 71',
+    'Life is 10% what happens to you and 90% how you react to it 72',
+    'Life is 10% what happens to you and 90% how you react to it 73',
+    'Life is 10% what happens to you and 90% how you react to it 74',
+    'Life is 10% what happens to you and 90% how you react to it 75',
+    'Life is 10% what happens to you and 90% how you react to it 76',
+    'Life is 10% what happens to you and 90% how you react to it 77',
+    'Life is 10% what happens to you and 90% how you react to it 78',
+    'Life is 10% what happens to you and 90% how you react to it 79',
+    'Life is 10% what happens to you and 90% how you react to it 80',
+    'Life is 10% what happens to you and 90% how you react to it 81',
+    'Life is 10% what happens to you and 90% how you react to it 82',
+    'Life is 10% what happens to you and 90% how you react to it 83',
+    'Life is 10% what happens to you and 90% how you react to it 84',
+    'Life is 10% what happens to you and 90% how you react to it 85',
+    'Life is 10% what happens to you and 90% how you react to it 86',
+    'Life is 10% what happens to you and 90% how you react to it 87',
+    'Life is 10% what happens to you and 90% how you react to it 88',
+    'Life is 10% what happens to you and 90% how you react to it 89',
+    'Life is 10% what happens to you and 90% how you react to it 90',
+    'Life is 10% what happens to you and 90% how you react to it 91',
+    'Life is 10% what happens to you and 90% how you react to it 92',
+    'Life is 10% what happens to you and 90% how you react to it 93',
+    'Life is 10% what happens to you and 90% how you react to it 94',
+    'Life is 10% what happens to you and 90% how you react to it 95',
+    'Life is 10% what happens to you and 90% how you react to it 96',
+    'Life is 10% what happens to you and 90% how you react to it 97',
+    'Life is 10% what happens to you and 90% how you react to it 98',
+    'Life is 10% what happens to you and 90% how you react to it 99',
+    'Life is 10% what happens to you and 90% how you react to it 100'
+];
+
+var AUTHORS = [
+    // From https://www.brainyquote.com/quotes/topics/topic_motivational.html
+    'Charles R. Swindoll',
+    // From http://quotelicious.com/quotes/motivational-quotes
+    UNKNOWN,
+    // From http://www.quotationspage.com/random.php3
+    'Victoria Holt',
+    'Charles R. Swindoll 4',
+    'Charles R. Swindoll 5',
+    'Charles R. Swindoll 6',
+    'Charles R. Swindoll 7',
+    'Charles R. Swindoll 8',
+    'Charles R. Swindoll 9',
+    'Charles R. Swindoll 10',
+    'Charles R. Swindoll 11',
+    'Charles R. Swindoll 12',
+    'Charles R. Swindoll 13',
+    'Charles R. Swindoll 14',
+    'Charles R. Swindoll 15',
+    'Charles R. Swindoll 16',
+    'Charles R. Swindoll 17',
+    'Charles R. Swindoll 18',
+    'Charles R. Swindoll 19',
+    'Charles R. Swindoll 20',
+    'Charles R. Swindoll 21',
+    'Charles R. Swindoll 22',
+    'Charles R. Swindoll 23',
+    'Charles R. Swindoll 24',
+    'Charles R. Swindoll 25',
+    'Charles R. Swindoll 26',
+    'Charles R. Swindoll 27',
+    'Charles R. Swindoll 28',
+    'Charles R. Swindoll 29',
+    'Charles R. Swindoll 30',
+    'Charles R. Swindoll 31',
+    'Charles R. Swindoll 32',
+    'Charles R. Swindoll 33',
+    'Charles R. Swindoll 34',
+    'Charles R. Swindoll 35',
+    'Charles R. Swindoll 36',
+    'Charles R. Swindoll 37',
+    'Charles R. Swindoll 38',
+    'Charles R. Swindoll 39',
+    'Charles R. Swindoll 40',
+    'Charles R. Swindoll 41',
+    'Charles R. Swindoll 42',
+    'Charles R. Swindoll 43',
+    'Charles R. Swindoll 44',
+    'Charles R. Swindoll 45',
+    'Charles R. Swindoll 46',
+    'Charles R. Swindoll 47',
+    'Charles R. Swindoll 48',
+    'Charles R. Swindoll 49',
+    'Charles R. Swindoll 50',
+    'Charles R. Swindoll 51',
+    'Charles R. Swindoll 52',
+    'Charles R. Swindoll 53',
+    'Charles R. Swindoll 54',
+    'Charles R. Swindoll 55',
+    'Charles R. Swindoll 56',
+    'Charles R. Swindoll 57',
+    'Charles R. Swindoll 58',
+    'Charles R. Swindoll 59',
+    'Charles R. Swindoll 60',
+    'Charles R. Swindoll 61',
+    'Charles R. Swindoll 62',
+    'Charles R. Swindoll 63',
+    'Charles R. Swindoll 64',
+    'Charles R. Swindoll 65',
+    'Charles R. Swindoll 66',
+    'Charles R. Swindoll 67',
+    'Charles R. Swindoll 68',
+    'Charles R. Swindoll 69',
+    'Charles R. Swindoll 70',
+    'Charles R. Swindoll 71',
+    'Charles R. Swindoll 72',
+    'Charles R. Swindoll 73',
+    'Charles R. Swindoll 74',
+    'Charles R. Swindoll 75',
+    'Charles R. Swindoll 76',
+    'Charles R. Swindoll 77',
+    'Charles R. Swindoll 78',
+    'Charles R. Swindoll 79',
+    'Charles R. Swindoll 80',
+    'Charles R. Swindoll 81',
+    'Charles R. Swindoll 82',
+    'Charles R. Swindoll 83',
+    'Charles R. Swindoll 84',
+    'Charles R. Swindoll 85',
+    'Charles R. Swindoll 86',
+    'Charles R. Swindoll 87',
+    'Charles R. Swindoll 88',
+    'Charles R. Swindoll 89',
+    'Charles R. Swindoll 90',
+    'Charles R. Swindoll 91',
+    'Charles R. Swindoll 92',
+    'Charles R. Swindoll 93',
+    'Charles R. Swindoll 94',
+    'Charles R. Swindoll 95',
+    'Charles R. Swindoll 96',
+    'Charles R. Swindoll 97',
+    'Charles R. Swindoll 98',
+    'Charles R. Swindoll 99',
+    'Charles R. Swindoll 100'
+];
+
+// From a Flick API call to get the favorites from my account:
+// https://api.flickr.com/services/rest/?&method=flickr.favorites.getList&per_page=500&page=1&api_key={process.env.FLICKR_KEY}&user_id=48889646@N07
+var IMAGES = [
+    // farm id, server id, photo id, photo secret
+    [3, 2045, 2867425266, '6baac16b44'],
+    [6, 5121, 5260847546, '0451eb4fb1'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44'],
+    [3, 2045, 2867425266, '6baac16b44']
+];
 
 // Route the incoming request based on type (LaunchRequest, IntentRequest,
 // etc.) The JSON body of the request is provided in the event parameter.
@@ -30,13 +337,11 @@ exports.handler = function (event, context) {
         }
 
         if (event.request.type === "LaunchRequest") {
-            onLaunch(event.request, event.session).then(function (responseValues) {
-                context.succeed(buildResponse(responseValues));
-            });
+            var responseValues = onLaunch(event.request, event.session);
+            context.succeed(buildResponse(responseValues));
         } else if (event.request.type === "IntentRequest") {
-            onIntent(event.request, event.session).then(function (responseValues) {
-                context.succeed(buildResponse(responseValues));
-            });
+            var responseValues = onIntent(event.request, event.session);
+            context.succeed(buildResponse(responseValues));
         } else if (event.request.type === "SessionEndedRequest") {
             onSessionEnded(event.request, event.session);
             context.succeed();
@@ -59,35 +364,26 @@ function onSessionStarted(sessionStartedRequest, session) {
 /**
  * Called when the user invokes the skill without specifying what they want.
  */
-function onLaunch(launchRequest, session, callback) {
+function onLaunch(launchRequest, session) {
     console.log("onLaunch requestId=" + launchRequest.requestId
         + ", sessionId=" + session.sessionId);
 
-    var promises = {
-        quoteAndCardText: getRandomMotivationalQuote().then(function (result) {
-            var response = new SSML();
-            response
-                .openSpeakTag()
-                .openParagraphTag()
-                .addPlainText(result.quote)
-                .closeParagraphTag()
-                .addPlainText(result.author)
-                .closeSpeakTag();
-            return {
-                quote: response.toString(),
-                cardText: getCardText(result)
-            };
-        }),
-        photoUrl: getRandomPhotoUrl()
+    var quote = getRandomMotivationalQuote();
+    var cardSsml = new SSML();
+    cardSsml
+        .openSpeakTag()
+        .openParagraphTag()
+        .addPlainText(quote.quote)
+        .closeParagraphTag()
+        .addPlainText(quote.author)
+        .closeSpeakTag();
+    var cardText = getCardText(quote);
+    var photoUrl = getRandomImageUrl();
+    var cardTitle = APP_NAME + "!";
+    return {
+        sessionAttributes: session.attributes,
+        speechletResponse: buildSpeechletResponseWithImage(cardTitle, cardSsml.toString(), cardText, photoUrl, "", "true")
     };
-
-    return RSVP.hash(promises).then(function (results) {
-        var cardTitle = APP_NAME + "!";
-        return {
-            sessionAttributes: session.attributes,
-            speechletResponse: buildSpeechletResponseWithImage(cardTitle, results.quoteAndCardText.quote, results.quoteAndCardText.cardText, results.photoUrl, "", "true")
-        };
-    });
 }
 
 /**
@@ -103,13 +399,7 @@ function onIntent(intentRequest, session) {
 
     // dispatch custom intents to handlers here
     if (intentName == 'GetRandomMotivationQuote') {
-        return handleIntentGetRandomMotivationQuote(intent, session).then(function (results) {
-            var cardTitle = APP_NAME + "!";
-            return {
-                sessionAttributes: session.attributes,
-                speechletResponse: buildSpeechletResponseWithImage(cardTitle, results.quoteAndCardText.quote, results.quoteAndCardText.cardText, results.photoUrl, "", "true")
-            };
-        });
+        return handleIntentGetRandomMotivationQuote(intent, session);
     } else {
         throw "Invalid intent";
     }
@@ -126,134 +416,36 @@ function onSessionEnded(sessionEndedRequest, session) {
     // Add any cleanup logic here
 }
 
-function handleIntentGetRandomMotivationQuote(intent, session, callback) {
-    var promises = {
-      quoteAndCardText: getRandomMotivationalQuote().then(function (result) {
-        var response = new SSML();
-        response
-            .openSpeakTag()
-            .openParagraphTag()
-            .addPlainText(result.quote)
-            .closeParagraphTag()
-            .addPlainText(result.author)
-            .closeSpeakTag();
-        return {
-            quote: response.toString(),
-            cardText: getCardText(result)
-        }
-      }),
-      photoUrl: getRandomPhotoUrl()
+function handleIntentGetRandomMotivationQuote(intent, session) {
+    var quote = getRandomMotivationalQuote();
+    var cardSsml = new SSML();
+    cardSsml
+        .openSpeakTag()
+        .openParagraphTag()
+        .addPlainText(quote.quote)
+        .closeParagraphTag()
+        .addPlainText(quote.author)
+        .closeSpeakTag();
+    var cardText = getCardText(quote);
+    var photoUrl = getRandomImageUrl();
+    var cardTitle = APP_NAME + "!";
+    return {
+        sessionAttributes: session.attributes,
+        speechletResponse: buildSpeechletResponseWithImage(cardTitle, cardSsml.toString(), cardText, photoUrl, "", "true")
     };
-
-    return RSVP.hash(promises);
 }
 
 // ------- Helper functions to fetch quotes -------
 
 function getRandomMotivationalQuote () {
-    var sources = [
-        getRandomMotivationalQuoteSoure1,
-        getRandomMotivationalQuoteSoure2/*,
-        getRandomMotivationalQuoteSoure3*/
-    ];
-    var sourceToUse = sources[Math.floor(Math.random() * sources.length)];
+    var randomIdx = Math.floor(Math.random() * QUOTES.length);
+    var quote = QUOTES[randomIdx] + '.';
+    var author = AUTHORS[randomIdx];
 
-    return sourceToUse();
-}
-
-// Go to a random page (0-9 inclusive) and pick a random quote
-function getRandomMotivationalQuoteSoure1 () {
-    console.log('getRandomMotivationalQuoteSoure1');
-    var min = 0;
-    var max = 9;
-    var pageNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    var page = (pageNum == min ? '': pageNum);
-    var quote = new RSVP.Promise(function(resolve, reject) {
-        request('https://www.brainyquote.com/quotes/topics/topic_motivational' + page + '.html', function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var $ = cheerio.load(body);
-                var quotes = $('div#quotesList div.bqQt');
-                if (quotes.length > 0) {
-                    var randomIdx = Math.floor(Math.random() * quotes.length);
-                    var rawQuote = quotes[randomIdx];
-                    var quote = $('a[title="view quote"]', rawQuote).text();
-                    var author = $('a[title="view author"]', rawQuote).text();
-                    resolve({
-                        quote: quote,
-                        author: author
-                    });
-                } else {
-                    reject('getRandomMotivationalQuoteSoure1 call failed: no quotes');
-                }
-            } else {
-                reject('getRandomMotivationalQuoteSoure1 call failed: ' + error);
-            }
-        });
-    });
-
-    return quote;   
-}
-
-// Go to a random page (1-9 inclusive) and pick a random quote
-function getRandomMotivationalQuoteSoure2 () {
-    console.log('getRandomMotivationalQuoteSoure2');
-    var min = 1;
-    var max = 9;
-    var pageNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    var page = (pageNum == min ? '': '/page/' + pageNum);
-    var quote = new RSVP.Promise(function(resolve, reject) {
-        request('http://quotelicious.com/quotes/motivational-quotes' + page, function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            var $ = cheerio.load(body);
-            var quotes = $('div#content-quotespage div.post');
-            if (quotes.length > 0) {
-                var randomIdx = Math.floor(Math.random() * quotes.length);
-                var rawQuote = quotes[randomIdx];
-                var quote = $('a', rawQuote).text();
-                var author = $('em', rawQuote).text().substring(2).trim();
-                resolve({
-                    quote: quote,
-                    author: author
-                });
-            } else {
-                reject('getRandomMotivationalQuoteSoure2 call failed: no quotes');
-            }
-          } else {
-            reject('getRandomMotivationalQuoteSoure2 call failed: ' + error);
-          }
-        });
-    });
-
-    return quote;
-}
-
-// Hit an API for a random quote
-function getRandomMotivationalQuoteSoure3 (callback) {
-    console.log('getRandomMotivationalQuoteSoure3');
-    var quote = new RSVP.Promise(function(resolve, reject) {
-        request.post('http://www.quotationspage.com/random.php3', {"form": {"number":4, "collection[]": "motivate"}}, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var $ = cheerio.load(body);
-                var quotes = $('dt.quote a[href *= "/quote/"]');
-                var authors = $('dd.author a[href *= "/quotes/"]');
-                if (quotes.length > 0) {
-                    var randomIdx = Math.floor(Math.random() * quotes.length);
-                    var quote = quotes[randomIdx].children[0].data.trim();
-                    var author = authors[randomIdx].children[0].data.trim();
-                    resolve({
-                        quote: quote,
-                        author: author
-                    });
-                } else {
-                    reject('getRandomMotivationalQuote3 call failed: no quotes');
-                }
-            } else {
-                reject('getRandomMotivationalQuote3 call failed: ' + error);
-            }
-        });
-    });
-
-    return quote;
+    return {
+        quote: quote,
+        author: author
+    };
 }
 
 // ------- FLICKR Helper -------
@@ -263,30 +455,11 @@ function getFlickrUrl (farmId, serverId, photoId, photoSecret) {
 }
 
 // fetch a random picture from https://www.flickr.com/photos/48889646@N07/favorites via the Flickr API
-function getRandomPhotoUrl () {
-    console.log('getRandomPhotoUrl - in');
-    var photosPerPage = 500;
-    var randomPageAndPhotoIdx = {
-        page: 1, // 1 index
-        photo: Math.floor(Math.random() * 154) // 0 index
-    };
-    var quote = new RSVP.Promise(function(resolve, reject) {
-        request('https://api.flickr.com/services/rest/?&method=flickr.favorites.getList&per_page=' + photosPerPage + '&page=' + randomPageAndPhotoIdx.page + '&api_key=' + process.env.FLICKR_KEY + '&user_id=48889646@N07', function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var $ = cheerio.load(body);
-                var photo = $('photo')[randomPageAndPhotoIdx.photo];
-                var farmId = photo.attribs.farm;
-                var serverId = photo.attribs.server;
-                var photoId = photo.attribs.id;
-                var photoSecret = photo.attribs.secret;
-                resolve(getFlickrUrl(farmId, serverId, photoId, photoSecret));
-            } else {
-                reject('getRandomPhotoUrl call failed: ' + error);
-            }
-        });
-    });
+function getRandomImageUrl () {
+    var randomIdx = Math.floor(Math.random() * IMAGES.length);
+    var imageData = IMAGES[randomIdx];
 
-    return quote;
+    return getFlickrUrl(imageData[0], imageData[1], imageData[2], imageData[3]);
 }
 
 // ------- SSML Helper -------
