@@ -78,7 +78,7 @@ function onLaunch(launchRequest, session, callback) {
                 cardText: getCardText(result)
             };
         }),
-        photoUrl: getRandomLandscapePhotoUrl()
+        photoUrl: getRandomPhotoUrl()
     };
 
     return RSVP.hash(promises).then(function (results) {
@@ -142,7 +142,7 @@ function handleIntentGetRandomMotivationQuote(intent, session, callback) {
             cardText: getCardText(result)
         }
       }),
-      photoUrl: getRandomLandscapePhotoUrl()
+      photoUrl: getRandomPhotoUrl()
     };
 
     return RSVP.hash(promises);
@@ -256,74 +256,32 @@ function getRandomMotivationalQuoteSoure3 (callback) {
     return quote;
 }
 
-function getRandomDesignQuote () {
-    console.log('getRandomDesignQuote');
-    var quote = new RSVP.Promise(function(resolve, reject) {
-        request('http://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1', function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var cleanBody = JSON.parse(body)[0];
-                var author = cleanBody.title;
-                var rawQuote = cleanBody.content; // '<p>.....</p>\n'
-                var cleanQuoteHtml = rawQuote.substring(0, rawQuote.length-1); // remove the newline
-                var $ = cheerio.load(cleanQuoteHtml);
-                var quote = $('p').text().trim();
-                resolve({
-                    quote: quote,
-                    author: author
-                });
-              } else {
-                reject('getRandomDesignQuote call failed: ' + error);
-              }
-        });
-    });
-
-    return quote;
-}
-
 // ------- FLICKR Helper -------
 
 function getFlickrUrl (farmId, serverId, photoId, photoSecret) {
     return 'https://farm' + farmId + '.staticflickr.com/' + serverId + '/' + photoId + '_' + photoSecret + '.jpg';
 }
 
-function _getRandomLandscapePhotoUrlCount () {
-    var photoCount = new RSVP.Promise(function(resolve, reject) {
-        request('https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=' + process.env.FLICKR_KEY + '&text=landscape&license=7&sort=relevance&per_page=1', function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                var $ = cheerio.load(body);
-                resolve($('photos').attr('total'));
-            } else {
-                reject('getRandomLandscapePhotoUrl call failed: ' + error);
-            }
-        });
-    });
-
-    return photoCount;
-}
-
-function _getPageAndPhoto (photosPerPage, photoNumber) {
-    return {
-        page: Math.floor(photoNumber / photosPerPage),
-        photoIdx: (photoNumber % photosPerPage || photosPerPage) - 1
+// fetch a random picture from https://www.flickr.com/photos/48889646@N07/favorites via the Flickr API
+function getRandomPhotoUrl () {
+    console.log('getRandomPhotoUrl - in');
+    var photosPerPage = 500;
+    var randomPageAndPhotoIdx = {
+        page: 1, // 1 index
+        photo: Math.floor(Math.random() * 154) // 0 index
     };
-}
-
-function getRandomLandscapePhotoUrl () {
-    var photosPerPage = 100;
-    var randomPhoto = Math.floor(Math.random() * 300); // There are 500 results per page. Since we sort by relevence let's pick the top 300 to consider.
-    var randomPageAndPhoto = _getPageAndPhoto(photosPerPage, randomPhoto);
     var quote = new RSVP.Promise(function(resolve, reject) {
-        request('https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=' + process.env.FLICKR_KEY + '&text=landscape&license=7&sort=relevance&per_page=' + photosPerPage + '&page=' + randomPageAndPhoto.page, function (error, response, body) {
+        request('https://api.flickr.com/services/rest/?&method=flickr.favorites.getList&per_page=' + photosPerPage + '&page=' + randomPageAndPhotoIdx.page + '&api_key=' + process.env.FLICKR_KEY + '&user_id=48889646@N07', function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 var $ = cheerio.load(body);
-                var photo = $('photo')[randomPageAndPhoto.photoIdx];
+                var photo = $('photo')[randomPageAndPhotoIdx.photo];
                 var farmId = photo.attribs.farm;
                 var serverId = photo.attribs.server;
                 var photoId = photo.attribs.id;
                 var photoSecret = photo.attribs.secret;
                 resolve(getFlickrUrl(farmId, serverId, photoId, photoSecret));
             } else {
-                reject('getRandomLandscapePhotoUrl call failed: ' + error);
+                reject('getRandomPhotoUrl call failed: ' + error);
             }
         });
     });

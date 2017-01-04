@@ -5,3 +5,8 @@
     }
   ]
 }
+
+GetRandomMotivationQuote for a quote
+GetRandomMotivationQuote for a motivational quote
+GetRandomMotivationQuote for a random quote
+GetRandomMotivationQuote for a random motivational quote
